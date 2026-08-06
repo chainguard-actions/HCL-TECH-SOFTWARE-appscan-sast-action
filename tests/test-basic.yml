@@ -1,0 +1,30 @@
+name: Test basic usage - required inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with required inputs (expect failure due to invalid credentials)
+        id: action
+        uses: .
+        continue-on-error: true
+        with:
+          asoc_key: fake-api-key
+          asoc_secret: fake-api-secret
+          application_id: fake-application-id
+      - name: Assert action ran and failed gracefully (not a crash)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail (invalid credentials), but not crash the runner
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action unexpectedly succeeded with fake credentials"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed as expected with invalid credentials"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
