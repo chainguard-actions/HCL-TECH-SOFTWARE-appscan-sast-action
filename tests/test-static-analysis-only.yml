@@ -1,0 +1,32 @@
+name: Test static_analysis_only option
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with static_analysis_only enabled (expect failure due to invalid creds)
+        id: action
+        uses: .
+        with:
+          asoc_key: 'invalid-key-00000000-0000-0000-0000-000000000000'
+          asoc_secret: 'invalid-secret-00000000-0000-0000-0000-000000000000'
+          application_id: 'invalid-app-id-00000000-0000-0000-0000-000000000000'
+          scan_name: 'test-scan-static-only'
+          static_analysis_only: true
+          wait_for_analysis: false
+        continue-on-error: true
+      - name: Assert action failed (invalid creds with static_analysis_only)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed with invalid credentials (static_analysis_only=true)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "FAIL: action unexpectedly succeeded with invalid credentials"
+            exit 1
+          else
+            echo "PASS: action did not succeed (outcome=$OUTCOME)"
+          fi

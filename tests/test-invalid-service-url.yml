@@ -1,0 +1,32 @@
+name: Test invalid service URL error handling
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with invalid service URL (expect failure)
+        id: action
+        uses: .
+        with:
+          asoc_key: 'invalid-key-00000000-0000-0000-0000-000000000000'
+          asoc_secret: 'invalid-secret-00000000-0000-0000-0000-000000000000'
+          application_id: 'invalid-app-id-00000000-0000-0000-0000-000000000000'
+          service_url: 'https://localhost:9999/invalid-appscan-endpoint'
+          scan_name: 'test-scan-invalid-url'
+          wait_for_analysis: false
+        continue-on-error: true
+      - name: Assert action failed with invalid service URL
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action correctly failed with invalid service URL"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "FAIL: action unexpectedly succeeded with invalid service URL"
+            exit 1
+          else
+            echo "PASS: action did not succeed (outcome=$OUTCOME)"
+          fi

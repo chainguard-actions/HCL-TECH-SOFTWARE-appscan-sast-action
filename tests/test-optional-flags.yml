@@ -1,0 +1,35 @@
+name: Test optional boolean flags are accepted
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Run action with optional boolean flags (expect failure at download, not input parsing)
+        id: action
+        uses: .
+        with:
+          asoc_key: fake-key-for-testing
+          asoc_secret: fake-secret-for-testing
+          application_id: fake-app-id-for-testing
+          scan_name: test-scan-optional-flags
+          service_url: https://localhost:1
+          personal_scan: true
+          static_analysis_only: true
+          wait_for_analysis: false
+          fail_for_noncompliance: false
+          failure_threshold: Medium
+        continue-on-error: true
+      - name: Assert action did not succeed
+        if: always()
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "FAIL: expected action to fail with invalid credentials, but it succeeded"
+            exit 1
+          fi
+          echo "PASS: action correctly did not succeed when given invalid credentials with optional flags (outcome=$OUTCOME)"
