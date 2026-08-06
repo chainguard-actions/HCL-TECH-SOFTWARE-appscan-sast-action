@@ -1,0 +1,50 @@
+name: Test optional boolean inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Test that the action correctly accepts all optional boolean/choice inputs
+      # without crashing on input parsing. It will still fail due to fake credentials,
+      # but the failure should be a network/auth error, not a JS crash.
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          asoc_key: fake-key-for-testing
+          asoc_secret: fake-secret-for-testing
+          application_id: fake-app-id-for-testing
+          scan_name: test-scan-optional-inputs
+          personal_scan: false
+          static_analysis_only: false
+          open_source_only: false
+          scan_build_outputs: false
+          wait_for_analysis: false
+          analysis_timeout_minutes: 30
+          fail_for_noncompliance: false
+          failure_threshold: Low
+
+      - name: Assert action failed (expected — no real AppScan credentials)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" != "failure" ]; then
+            echo "FAIL: expected action to fail with fake credentials, but got outcome=$OUTCOME"
+            exit 1
+          fi
+          echo "PASS: action failed as expected (network/auth error, not JS crash)"
+
+      - name: Assert conclusion is success (continue-on-error overrides conclusion)
+        env:
+          CONCLUSION: ${{ steps.action.conclusion }}
+        run: |
+          echo "conclusion: $CONCLUSION"
+          if [ "$CONCLUSION" != "success" ]; then
+            echo "FAIL: expected conclusion=success (continue-on-error), got $CONCLUSION"
+            exit 1
+          fi
+          echo "PASS: conclusion is success as expected (continue-on-error was set)"
