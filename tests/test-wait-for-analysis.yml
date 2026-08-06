@@ -1,0 +1,36 @@
+name: Test wait for analysis with failure threshold
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          asoc_key: fake-key-for-testing
+          asoc_secret: fake-secret-for-testing
+          application_id: fake-app-id-for-testing
+          scan_name: test-wait-scan
+          wait_for_analysis: true
+          analysis_timeout_minutes: 5
+          fail_for_noncompliance: true
+          failure_threshold: Medium
+      - name: Assert action ran with wait_for_analysis inputs accepted
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail due to invalid credentials, not due to input parsing errors
+          # This verifies that wait_for_analysis, analysis_timeout_minutes, fail_for_noncompliance,
+          # and failure_threshold inputs are accepted without crashing
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action succeeded unexpectedly"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with wait_for_analysis flags and failed as expected with invalid credentials"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi

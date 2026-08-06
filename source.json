@@ -1,6 +1,16 @@
 {
   "owner": "HCL-TECH-SOFTWARE",
   "repo": "appscan-sast-action",
-  "version": "",
-  "url": "https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action"
+  "version": "v1.0.4",
+  "commit_sha": "4aa5e72ffc67d4f2cb986cfbc26b5f34fa4eb4f1",
+  "url": "https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action",
+  "policy_sha": "d636be7e43ef829af6e853da6b3c7566db9f72fe",
+  "test_policy_sha": "843adf9e4b8f85d0c08b27b9d0b09dd094b54702",
+  "test_agent_version": "2",
+  "harden_agent_version": "2",
+  "node_artifact": {
+    "gcs_uri": "gs://prod-actions-node-artifacts/node-artifacts/HCL-TECH-SOFTWARE/appscan-sast-action/v1.0.4/sha256-256023ef8c5215b3ba022f53f661002083601e538f2a3494e715aa31670d60d6.tar.gz",
+    "sha256": "256023ef8c5215b3ba022f53f661002083601e538f2a3494e715aa31670d60d6",
+    "size_bytes": 1591983
+  }
 }

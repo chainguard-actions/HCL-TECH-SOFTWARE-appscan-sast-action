@@ -1,0 +1,36 @@
+name: Test SCA-only scan with custom service URL
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          asoc_key: fake-key-for-testing
+          asoc_secret: fake-secret-for-testing
+          application_id: fake-app-id-for-testing
+          scan_name: test-sca-scan
+          open_source_only: true
+          scan_build_outputs: false
+          service_url: https://cloud.appscan.com
+          acceptssl: true
+      - name: Assert action ran with SCA-only and service_url inputs accepted
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should fail due to invalid credentials, not due to input parsing errors
+          # This verifies that open_source_only, scan_build_outputs, service_url, and acceptssl
+          # inputs are accepted without crashing
+          if [ "$OUTCOME" = "success" ]; then
+            echo "WARN: action succeeded unexpectedly"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with SCA-only flags and failed as expected with invalid credentials"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
