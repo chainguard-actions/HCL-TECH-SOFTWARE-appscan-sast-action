@@ -1,19 +1,105 @@
-# HCL-TECH-SOFTWARE/appscan-sast-action
+# HCL AppScan SAST Github Action
+Your code is better and more secure with HCL AppScan.
 
-Scan for security issues in code
+The HCL AppScan SAST Github Action enables you to run static analysis security testing (SAST) and software composition analysis (SCA) against the files in your repository. The SAST scan identifies security vulnerabilities in your code and the SCA scan identifies vulnerabilities in your dependencies. Results are stored in AppScan on Cloud or AppScan 360.
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action).
+# Usage
+## Register
+If you don't have an account, register on [HCL AppScan on Cloud (ASoC)](https://www.hcltechsw.com/appscan/codesweep-for-github) to generate your API key and API secret. Not required for AppScan 360.
 
-## Versions
+## Setup
+1. Generate your API key and API secret on [the API page](https://cloud.appscan.com/main/settings).
+- The API key and API secret map to the `asoc_key` and `asoc_secret` parameters for this action. Store the API key and API secret as [secrets](https://docs.github.com/en/actions/security-guides/encrypted-secrets) in your repository.
+![addingkeys_animation](img/keyAndSecret.gif)
+2. Create the application in ASoC or AppScan 360. 
+- The application ID in ASoC/AppScan 360 maps to application_id for this action.
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.0.4 | [`v1.0.4`](https://github.com/chainguard-actions/HCL-TECH-SOFTWARE-appscan-sast-action/tree/v1.0.4) | [`4aa5e72`](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action/commit/4aa5e72ffc67d4f2cb986cfbc26b5f34fa4eb4f1) |
-| v1.0.6 | [`v1.0.6`](https://github.com/chainguard-actions/HCL-TECH-SOFTWARE-appscan-sast-action/tree/v1.0.6) | [`287007c`](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action/commit/287007ca54a816c70ff50d0c68bf3c9bf33a6af3) |
-| v1.0.7 | [`v1.0.7`](https://github.com/chainguard-actions/HCL-TECH-SOFTWARE-appscan-sast-action/tree/v1.0.7) | [`242b81b`](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action/commit/242b81b580cd1ff43540493052d063b49e9363c4) |
-| v1.0.8 | [`v1.0.8`](https://github.com/chainguard-actions/HCL-TECH-SOFTWARE-appscan-sast-action/tree/v1.0.8) | [`d540551`](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action/commit/d54055109c7e851c89905d26e240f9b6ec7ec4e4) |
-| v1.0.9 | [`v1.0.9`](https://github.com/chainguard-actions/HCL-TECH-SOFTWARE-appscan-sast-action/tree/v1.0.9) | [`8fd5714`](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action/commit/8fd57141f8f6288206c2840e71fec024f78d9d80) |
-| v1.1.1 | [`v1.1.1`](https://github.com/chainguard-actions/HCL-TECH-SOFTWARE-appscan-sast-action/tree/v1.1.1) | [`131fbe7`](https://github.com/HCL-TECH-SOFTWARE/appscan-sast-action/commit/131fbe735294b0f74c21022e679975fffd58b62f) |
+# Required Inputs
+| Name |   Description    |
+|    :---:    |    :---:    |
+| asoc_key | Your API key from [the API page](https://cloud.appscan.com/main/settings) |
+| asoc_secret | Your API secret from [the API page](https://cloud.appscan.com/main/settings) |
+| application_id | The ID of the application in ASoC or AppScan 360. |
+
+# Optional Inputs
+| Name | Description | Default Value |
+|    :---:    |    :---:    |    :---:    |
+| service_url | The url for connections to AppScan 360. Not required for connections to AppScan on Cloud (ASoC) | https://cloud.appscan.com |
+| acceptssl | Allow connections to an AppScan 360 service with an untrusted certificate. Recommended for testing purposes only. | false |
+| scan_name | The name of the scan created in ASoC. | The GitHub repository name |
+| incremental_scan | Only scan files that were added or modified in a pull request. | false |
+| personal_scan | Make this a [personal scan](https://help.hcltechsw.com/appscan/ASoC/appseccloud_scans_personal.html). | false |
+| sast_scan_id | The ID of an existing SAST scan to use for running a rescan. | null |
+| sca_scan_id | The ID of an existing SCA scan to use for running a rescan. | null |
+| static_analysis_only | Only run static analysis. Do not run SCA (Software Composition Analysis). | false |
+| open_source_only | Only run SCA (Software Composition Analysis). Do not run static analysis. | false |
+| secrets_only | Only scan for secrets. Do not run static analysis or software composition analysis. | false |
+| scan_build_outputs | By default only source code files will be analyzed. Enabling this option will result in build output files for Java and .NET to be analyzed (.jar/.war/.ear/.dll/.exe). Additionally, Maven, Gradle, and Visual Studio solutions will be built if the build environment is available. | false |
+| wait_for_analysis | By default this action will initiate the scan in ASoC, but it will not wait for analysis to complete. Enabling this option will cause the action to wait for analysis to complete. Note that this will cause the action to run longer. | false |
+| analysis_timeout_minutes | If **wait_for_analysis** is true, the number of minutes to wait for analysis to complete. | 30 minutes |
+| fail_for_noncompliance | If **wait_for_analysis** is true, fail the job if any non-compliant issues are found in the scan. | false |
+| failure_threshold | If **fail_for_noncompliance** is enabled, the severity that indicates a failure. Lesser severities will not be considered a failure. For example, if **failure_threshold** is set to Medium, Informational and/or Low severity issues will not cause a failure. Medium, High, and/or Critical issues will cause a failure. | Low |
+| github_token | Set the value to ${{ github.token }} to display the PR scan summary in the pull request comment section. | github.token|
+
+# Snapshots
+
+- Both the build and pull request (PR) comment summary captures information about the following:
+    - Type of scan executed
+    - The scan id generated
+    - Associated application name in ASoC or AppScan 360
+    - Repository scanned
+    - Scan time
+    - Downloadable report link for the scan type executed
+
+#### The following snapshot shows the scan summary output on the job summary page.
+<div>
+  <img src="img/build_summary_sast.png" alt="Build Summary SAST" width="48%">
+</div>
+
+- To view the Scan ID and Application name in ASoC or AS 360, click on the respective hyperlinks.
+- Scan security report for SAST or SCA can be downloaded directly from the Report section in the summary table.
+
+#### The following snapshots show the scan summary output in the request comment section.
+
+<div>
+  <img src="img/pull_request_comment_summary_1.png" alt="Pull Request Comment Summary 1" width="48%">
+  <img src="img/pull_request_comment_summary_2.png" alt="Pull Request Comment Summary 2" width="48%">
+</div>
+
+- Under the Pull Request Information table you can directly view the details about the pull request, branch and commit by clicking on their respective hyperlinks.
+- To view the Scan ID and Application name in ASoC or AS 360, click on the respective hyperlinks.
+- Scan security report for SAST or SCA can be downloaded directly from the Report section in the summary table.
+
+# Examples
+The pull_request trigger and permissions block (pull-requests: write, issues: write, contents: read) follow standard GitHub Actions syntax.
+```yaml
+name: "HCL AppScan SAST"
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Run AppScan SAST scan
+        uses: HCL-TECH-SOFTWARE/appscan-sast-action@v1.1.2
+        with:
+          asoc_key: ${{secrets.ASOC_KEY}}
+          asoc_secret: ${{secrets.ASOC_SECRET}}
+          application_id: e35ea96d-cae0-499a-a3ed-7a4efd77b269
+```
 
 ## Privacy
 

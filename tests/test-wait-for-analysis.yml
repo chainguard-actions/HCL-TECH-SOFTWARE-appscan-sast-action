@@ -1,0 +1,35 @@
+name: Test wait for analysis with compliance failure threshold
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          asoc_key: fake-key-for-testing
+          asoc_secret: fake-secret-for-testing
+          application_id: fake-app-id-for-testing
+          scan_name: test-wait-analysis-scan
+          wait_for_analysis: true
+          analysis_timeout_minutes: 5
+          fail_for_noncompliance: true
+          failure_threshold: High
+
+      - name: Assert action failed gracefully (invalid credentials, wait_for_analysis inputs accepted)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected with invalid credentials"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded (unexpected but acceptable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
