@@ -1,0 +1,14 @@
+{
+  "status": "unbundlable",
+  "entries": [
+    {
+      "path": "src/main.js",
+      "status": "unbundlable",
+      "reason": "ignored-dynamic-import: Importing \"supports-color\" was allowed even though it could not be resolved because dynamic import failures appear to be handled here:",
+      "warnings": [
+        "ignored-dynamic-import: Importing \"supports-color\" was allowed even though it could not be resolved because dynamic import failures appear to be handled here:",
+        "unsupported-require-call: This call to \"require\" will not be bundled because the argument is not a string literal"
+      ]
+    }
+  ]
+}
